@@ -1,94 +1,156 @@
 package edu.upenn.cis573.hwk2;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.os.Bundle;
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.os.AsyncTask;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
-public class GameActivity extends Unicorn2Activity {
-	
-	// a global, static instance so that the GameView object can refer to this object
-	public static GameActivity instance;
-	// keeps track of the best time so far
-	private static float bestTime = 10000000;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.play_game);
-		
-        instance = this;
-        
-        // this method is deprecated but, trust me, it's easier this way
-        showDialog(0);
-	}
-	
-	static View getScoreboard() {
-		return instance.findViewById(R.id.scoreboard);
-	}
-	
-    public void onButtonClick(View v) {
-    	// this terminates the Activity and goes back to the previous one
-    	finish();
+public class GameView extends View {
+	private Image image = new Image(-150, 100);
+    private Stroke stroke = new Stroke(Color.RED, 10);
+    private boolean killed = false;
+    private boolean newUnicorn = true;
+    private int score = 0;
+    private int yChange = 0;
+    public long startTime;
+    public long endTime;
+
+    public GameView(Context context) {
+	    super(context);
+	    setBackgroundResource(R.drawable.space);
+	    image.setAndScaleImage(getResources(), R.drawable.unicorn, 150, 150, false);
     }
     
-    protected Dialog onCreateDialog(int id) {
-    	if (id == 0) {
-	    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            // this is the message to display
-	    	builder.setMessage("Ready?"); 
-            // this is the button to display
-	    	builder.setPositiveButton(R.string.yes,
-	    		new DialogInterface.OnClickListener() {
-                       // this is the method to call when the button is clicked 
-	    	           public void onClick(DialogInterface dialog, int id) {
-                           // this will hide the dialog
-	    	        	   dialog.cancel();
-	    	        	   // then start the unicorn moving across the screen
-	    	               GameView gv = (GameView)findViewById(R.id.gameView);
-	    	               GameView.BackgroundDrawingTask t = gv.new BackgroundDrawingTask();
-	    	               t.execute();
-	    	               gv.startTime = System.currentTimeMillis();
-	    	           }
-	    	         });
-    		return builder.create();
-    	}
-    	else if (id == 1) {
-	    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            // figure out which message to display
-            GameView gv = (GameView)findViewById(R.id.gameView);
-	    	long time = gv.endTime - gv.startTime;
-	    	// a little magic to convert to tenths of a second
-	    	float displayTime = (time / 100) / (float)10.0;
-	    	if (bestTime == 10000000) {
-	    		bestTime = displayTime;
-		    	builder.setMessage("Great job! You finished in " + displayTime + " seconds"); 
-	    	}
-	    	else if (displayTime <= bestTime) {
-	    		bestTime = displayTime;
-		    	builder.setMessage("You finished in " + displayTime + " seconds! That's the fastest so far!"); 
-	    	}
-	    	else builder.setMessage("Great job! You finished in " + displayTime + " seconds; the best so far is " + bestTime);
-	    	
-            // this is the button to display
-	    	builder.setPositiveButton(R.string.yes,
-	    		new DialogInterface.OnClickListener() {
-                       // this is the method to call when the button is clicked 
-	    	           public void onClick(DialogInterface dialog, int id) {
-                           // this will hide the dialog
-	    	        	   dialog.cancel();
-	    	        	   // this will terminate this Activity
-	    	        	   finish();
-	    	           }
-	    	         });
-    		return builder.create();
-    		
-    	}
-    	else return null;
+    public GameView(Context context, AttributeSet attributeSet) {
+    	super(context, attributeSet);
+	    setBackgroundResource(R.drawable.space);
+	    image.setAndScaleImage(getResources(), R.drawable.unicorn, 150, 150, false);
     }
     
+    /*
+     * This method is automatically invoked when the View is displayed.
+     * It is also called after you call "invalidate" on this object.
+     */
+    protected void onDraw(Canvas canvas) {    	
+
+    	// resets the position of the unicorn if one is killed or reaches the right edge
+    	if (newUnicorn || image.getImagePoint().x >= this.getWidth()) {
+    		image.setImagePoint(-150, (int)(Math.random() * 200 + 200));
+    		yChange = (int)(10 - Math.random() * 20);
+    		newUnicorn = false;
+    		killed = false;
+    	}
+
+		// show the exploding image when the unicorn is killed
+    	if (killed) {
+    	    image.setAndScaleImage(getResources(), R.drawable.explosion, 150, 150, false);
+    		canvas.drawBitmap(image.getImage(), image.getImagePoint().x, image.getImagePoint().y, null);
+    		newUnicorn = true;
+    	    image.setAndScaleImage(getResources(), R.drawable.unicorn, 150, 150, false);
+    		try { Thread.sleep(10); } catch (Exception e) { }
+    		invalidate();
+    		return;
+    	}
+
+    	// draws the unicorn at the specified point
+		canvas.drawBitmap(image.getImage(), image.getImagePoint().x, image.getImagePoint().y, null);
+    	
+		// draws the stroke
+    	if (stroke.getPoints().size() > 1) {
+    		for (int i = 0; i < stroke.getPoints().size()-1; i++) {
+    			int startX = stroke.getPoints().get(i).x;
+    			int stopX = stroke.getPoints().get(i+1).x;
+    			int startY = stroke.getPoints().get(i).y;
+    			int stopY = stroke.getPoints().get(i+1).y;
+    			Paint paint = new Paint();
+    			paint.setColor(stroke.getColor());
+    			paint.setStrokeWidth(stroke.getWidth());
+    			canvas.drawLine(startX, startY, stopX, stopY, paint);
+    		}
+    	}
+    	
+    }
+
+    /* 
+     * This method is automatically called when the user touches the screen.
+     */
+    public boolean onTouchEvent(MotionEvent event) {
+    	
+    	if (event.getAction() == MotionEvent.ACTION_DOWN) {
+    		stroke.addPoint((int)event.getX(), (int)event.getY());
+    	}
+    	else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+    		stroke.addPoint((int)event.getX(), (int)event.getY());
+    	}
+    	else if (event.getAction() == MotionEvent.ACTION_UP) {
+    		stroke.clearPoints();
+    	}
+    	else {
+    		return false;
+    	}
+    	
+    	// see if the point is within the boundary of the image
+    	float x = event.getX();
+    	float y = event.getY();
+    	// the !killed thing here is to prevent a "double-kill" that could occur
+    	// while the "explosion" image is being shown
+        if (!killed && image.isWithinBound(x, y)) {
+    		killed = true;
+    		score++;
+    		((TextView)(GameActivity.instance.getScoreboard())).setText(""+score);
+    	}
+    	
+    	// forces a redraw of the View
+    	invalidate();
+    	
+    	return true;
+    }    
+
     
+    /*
+     * This inner class is responsible for making the unicorn appear to move.
+     * When "exec" is called on an object of this class, "doInBackground" gets
+     * called in a background thread. It just waits 10ms and then updates the
+     * image's position. Then "onPostExecute" is called.
+     */
+    class BackgroundDrawingTask extends AsyncTask<Integer, Void, Integer> {
+    	
+    	// this method gets run in the background
+    	protected Integer doInBackground(Integer... args) {
+    		try { 
+    			// note: you can change these values to make the unicorn go faster/slower
+    			Thread.sleep(10); 
+    			image.offsetImagePoint(10, yChange);
+    		} 
+    		catch (Exception e) { }
+    		// the return value is passed to "onPostExecute" but isn't actually used here
+    		return 1; 
+    	}
+    	
+    	// this method gets run in the UI thread
+    	protected void onPostExecute(Integer result) {
+    		// redraw the View
+    		invalidate();
+    		if (score < 10) {
+    			// need to start a new thread to make the unicorn keep moving
+    			BackgroundDrawingTask task = new BackgroundDrawingTask();
+    			task.execute();
+    		}
+    		else {
+    			// game over, man!
+    			endTime = System.currentTimeMillis();
+    			// these methods are deprecated but it's okay to use them... probably.
+    			GameActivity.instance.removeDialog(1);
+    			GameActivity.instance.showDialog(1);
+    		}
+    	}    	
+    }
+
 }
-
 
