@@ -1,7 +1,6 @@
 package edu.upenn.cis573.hwk2;
 
 import java.util.ArrayList;
-import android.graphics.Color;
 import android.graphics.Point;
 
 public class Stroke {
