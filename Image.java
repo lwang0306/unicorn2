@@ -34,5 +34,12 @@ public class Image {
 	protected Bitmap getImage() {
 		return image;
 	}
+	
+	protected boolean isWithinBound(float x, float y) {
+		int width = image.getWidth();
+    	int height = image.getHeight();
+    	return (x > imagePoint.x && x < imagePoint.x + width 
+    			&& y > imagePoint.y && y < imagePoint.y + height);
+	}
 
 }
