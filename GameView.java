@@ -50,8 +50,7 @@ public class GameView extends View {
 
     	// resets the position of the unicorn if one is killed or reaches the right edge
     	if (newUnicorn || imagePoint.x >= this.getWidth()) {
-    		imagePoint.x = -150;
-    		imagePoint.y = (int)(Math.random() * 200 + 200);
+    		imagePoint.set(-150, (int)(Math.random() * 200 + 200));
     		yChange = (int)(10 - Math.random() * 20);
     		newUnicorn = false;
     		killed = false;
@@ -138,8 +137,7 @@ public class GameView extends View {
     		try { 
     			// note: you can change these values to make the unicorn go faster/slower
     			Thread.sleep(10); 
-    			imagePoint.x += 10; 
-    			imagePoint.y += yChange; 
+    			imagePoint.offset(10, yChange);
     		} 
     		catch (Exception e) { }
     		// the return value is passed to "onPostExecute" but isn't actually used here
