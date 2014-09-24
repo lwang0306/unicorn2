@@ -18,8 +18,6 @@ public class GameView extends View {
     private boolean newUnicorn = true;
     private int score = 0;
     private int yChange = 0;
-    public long startTime;
-    public long endTime;
 
     public GameView(Context context) {
 	    super(context);
