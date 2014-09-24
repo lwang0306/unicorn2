@@ -121,9 +121,6 @@ public class GameView extends View {
     	return score;
     }
     
-    protected void setEndtime(long time) {
-    	endTime = time;
-    }
-
+    
 }
 
