@@ -9,7 +9,6 @@ import android.view.View;
 public class GameActivity extends Unicorn2Activity {
 	
 	// a global, static instance so that the GameView object can refer to this object
-	public static GameActivity instance;
 	// keeps track of the best time so far
 	private static float bestTime = 10000000;
 
@@ -18,14 +17,9 @@ public class GameActivity extends Unicorn2Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.play_game);
 		
-        instance = this;
         
         // this method is deprecated but, trust me, it's easier this way
         showDialog(0);
-	}
-	
-	static View getScoreboard() {
-		return instance.findViewById(R.id.scoreboard);
 	}
 	
     public void onButtonClick(View v) {
@@ -47,7 +41,6 @@ public class GameActivity extends Unicorn2Activity {
 	    	        	   dialog.cancel();
 	    	        	   // then start the unicorn moving across the screen
 	    	               GameView gv = (GameView)findViewById(R.id.gameView);
-//	    	               GameView.BackgroundDrawingTask t = gv.new BackgroundDrawingTask();
 	    	               BackgroundDrawingTask t = new BackgroundDrawingTask(gv);
 	    	               t.execute();
 	    	               gv.startTime = System.currentTimeMillis();
