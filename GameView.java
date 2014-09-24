@@ -1,5 +1,6 @@
 package edu.upenn.cis573.hwk2;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -100,7 +101,7 @@ public class GameView extends View {
         if (!killed && image.isWithinBound(event.getX(), event.getY())) {
     		killed = true;
     		score++;
-    		((TextView)(GameActivity.instance.getScoreboard())).setText(""+score);
+    		((TextView) ((Activity) getContext()).findViewById(R.id.scoreboard)).setText(""+score);
     	}
     	
     	// forces a redraw of the View
@@ -120,7 +121,6 @@ public class GameView extends View {
     protected int getScore() {
     	return score;
     }
-    
-    
+
 }
 
