@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -96,13 +95,9 @@ public class GameView extends View {
     	}
     	
     	// see if the point is within the boundary of the image
-    	int width = image.getImage().getWidth();
-    	int height = image.getImage().getHeight();
-    	float x = event.getX();
-    	float y = event.getY();
     	// the !killed thing here is to prevent a "double-kill" that could occur
     	// while the "explosion" image is being shown
-    	if (!killed && x > image.getImagePoint().x && x < image.getImagePoint().x + width && y > image.getImagePoint().y && y < image.getImagePoint().y + height) {
+        if (!killed && image.isWithinBound(event.getX(), event.getY())) {
     		killed = true;
     		score++;
     		((TextView)(GameActivity.instance.getScoreboard())).setText(""+score);
@@ -112,46 +107,22 @@ public class GameView extends View {
     	invalidate();
     	
     	return true;
-    }    
-
+    }
     
-    /*
-     * This inner class is responsible for making the unicorn appear to move.
-     * When "exec" is called on an object of this class, "doInBackground" gets
-     * called in a background thread. It just waits 10ms and then updates the
-     * image's position. Then "onPostExecute" is called.
-     */
-    class BackgroundDrawingTask extends AsyncTask<Integer, Void, Integer> {
-    	
-    	// this method gets run in the background
-    	protected Integer doInBackground(Integer... args) {
-    		try { 
-    			// note: you can change these values to make the unicorn go faster/slower
-    			Thread.sleep(10); 
-    			image.offsetImagePoint(10, yChange);
-    		} 
-    		catch (Exception e) { }
-    		// the return value is passed to "onPostExecute" but isn't actually used here
-    		return 1; 
-    	}
-    	
-    	// this method gets run in the UI thread
-    	protected void onPostExecute(Integer result) {
-    		// redraw the View
-    		invalidate();
-    		if (score < 10) {
-    			// need to start a new thread to make the unicorn keep moving
-    			BackgroundDrawingTask task = new BackgroundDrawingTask();
-    			task.execute();
-    		}
-    		else {
-    			// game over, man!
-    			endTime = System.currentTimeMillis();
-    			// these methods are deprecated but it's okay to use them... probably.
-    			GameActivity.instance.removeDialog(1);
-    			GameActivity.instance.showDialog(1);
-    		}
-    	}    	
+    protected void offSetImagePoint(int dx, int dy) {
+    	image.offsetImagePoint(dx, dy);
+    }
+    
+    protected int getYChange() {
+    	return yChange;
+    }
+    
+    protected int getScore() {
+    	return score;
+    }
+    
+    protected void setEndtime(long time) {
+    	endTime = time;
     }
 
 }
