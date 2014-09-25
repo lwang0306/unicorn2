@@ -123,17 +123,8 @@ public class GameView extends View {
 	 * @param dy
 	 *            The offset of y coordinate.
 	 */
-	protected void offSetImagePoint(int dx, int dy) {
-		image.offsetImagePoint(dx, dy);
-	}
-
-	/**
-	 * Get yChange in GameView.
-	 * 
-	 * @return yChange.
-	 */
-	protected int getYChange() {
-		return yChange;
+	protected void offSetImagePoint() {
+		image.offsetImagePoint(10, yChange);
 	}
 
 	/**
