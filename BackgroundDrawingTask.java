@@ -22,7 +22,7 @@ public class BackgroundDrawingTask extends AsyncTask<Integer, Void, Integer> {
 			// note: you can change these values to make the unicorn go
 			// faster/slower
 			Thread.sleep(10);
-			gameView.offSetImagePoint(10, gameView.getYChange());
+			gameView.offSetImagePoint();
 		} catch (Exception e) {
 		}
 		// the return value is passed to "onPostExecute" but isn't actually used
