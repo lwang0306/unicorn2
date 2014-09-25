@@ -20,4 +20,5 @@ public class MainActivity extends Unicorn2Activity {
 		Intent i = new Intent(this, GameActivity.class);
 		startActivity(i);
 	}
+
 }
