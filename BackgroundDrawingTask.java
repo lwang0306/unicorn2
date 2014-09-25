@@ -9,25 +9,27 @@ import android.os.AsyncTask;
  * image's position. Then "onPostExecute" is called.
  */
 public class BackgroundDrawingTask extends AsyncTask<Integer, Void, Integer> {
-	
+
 	private GameView gameView;
-	
+
 	public BackgroundDrawingTask(GameView gv) {
 		gameView = gv;
 	}
-	
+
 	// this method gets run in the background
 	protected Integer doInBackground(Integer... args) {
-		try { 
-			// note: you can change these values to make the unicorn go faster/slower
-			Thread.sleep(10); 
+		try {
+			// note: you can change these values to make the unicorn go
+			// faster/slower
+			Thread.sleep(10);
 			gameView.offSetImagePoint(10, gameView.getYChange());
-		} 
-		catch (Exception e) { }
-		// the return value is passed to "onPostExecute" but isn't actually used here
-		return 1; 
+		} catch (Exception e) {
+		}
+		// the return value is passed to "onPostExecute" but isn't actually used
+		// here
+		return 1;
 	}
-	
+
 	// this method gets run in the UI thread
 	protected void onPostExecute(Integer result) {
 		// redraw the View
@@ -36,15 +38,14 @@ public class BackgroundDrawingTask extends AsyncTask<Integer, Void, Integer> {
 			// need to start a new thread to make the unicorn keep moving
 			BackgroundDrawingTask task = new BackgroundDrawingTask(gameView);
 			task.execute();
-		}
-		else {
+		} else {
 			// game over, man!
-			((GameActivity) gameView.getContext()).endTime = System.currentTimeMillis();
-			// these methods are deprecated but it's okay to use them... probably.
+			((GameActivity) gameView.getContext()).endTime = System
+					.currentTimeMillis();
+			// these methods are deprecated but it's okay to use them...
+			// probably.
 			((GameActivity) gameView.getContext()).removeDialog(1);
 			((GameActivity) gameView.getContext()).showDialog(1);
 		}
-	}    	
+	}
 }
-
-
