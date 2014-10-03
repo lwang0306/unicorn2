@@ -1,16 +1,20 @@
 package edu.upenn.cis573.hwk2;
 
-import android.content.res.Resources;
+import java.util.HashMap;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Point;
+import android.view.View;
 
 /**
  * This class holds the image to display, and its position.
  */
 public class Image {
-	private Bitmap image;
+	HashMap<String, Bitmap> images;
 	private Point imagePoint;
+	private View view;
 
 	/**
 	 * Construct an Image by position (x, y).
@@ -18,28 +22,28 @@ public class Image {
 	 * @param x
 	 * @param y
 	 */
-	public Image(int x, int y) {
-		imagePoint = new Point(x, y);
+	public Image(View gv) {
+		view = gv;
+		imagePoint = new Point(-150, 100);
+		images = new HashMap<String, Bitmap>();
 	}
 
 	/**
-	 * Set and scale an bitmap.
+	 * Add bitmap to Image with a key.
 	 * 
-	 * @param res
-	 *            The resources object containing the image data.
+	 * @param key
+	 *            A string key of the bitmap.
 	 * @param id
-	 *            The resources id of the image data.
+	 *            The id of the image.
 	 * @param dstWidth
 	 *            The new bitmap's desired width.
 	 * @param dstHeight
 	 *            The new bitmap's desired height.
-	 * @param filter
-	 *            true if the source should be filtered
 	 */
-	protected void setAndScaleImage(Resources res, int id, int dstWidth,
-			int dstHeight, boolean filter) {
-		image = BitmapFactory.decodeResource(res, id);
-		image = Bitmap.createScaledBitmap(image, dstWidth, dstHeight, filter);
+	protected void insertImage(String key, int id, int dstWidth, int dstHeight) {
+		Bitmap bitmap = BitmapFactory.decodeResource(view.getResources(), id);
+		bitmap = Bitmap.createScaledBitmap(bitmap, dstWidth, dstHeight, false);
+		images.put(key, bitmap);
 	}
 
 	/**
@@ -76,8 +80,8 @@ public class Image {
 	 * 
 	 * @return image data
 	 */
-	protected Bitmap getImage() {
-		return image;
+	protected Bitmap getImage(String str) {
+		return images.get(str);
 	}
 
 	/**
@@ -90,10 +94,23 @@ public class Image {
 	 * @return true if within the bound, false else
 	 */
 	protected boolean isWithinBound(float x, float y) {
-		int width = image.getWidth();
-		int height = image.getHeight();
+		int width = images.get("unicorn").getWidth();
+		int height = images.get("unicorn").getHeight();
 		return (x > imagePoint.x && x < imagePoint.x + width
 				&& y > imagePoint.y && y < imagePoint.y + height);
+	}
+
+	/**
+	 * draws the unicorn at the specified point
+	 * 
+	 * @param canvas
+	 *            The canvas to draw on.
+	 * @param str
+	 *            The key of the bitmap to be drawn.
+	 */
+	protected void drawBitmap(Canvas canvas, String str) {
+		canvas.drawBitmap(images.get(str), getImagePoint().x,
+				getImagePoint().y, null);
 	}
 
 }
