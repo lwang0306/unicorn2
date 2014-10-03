@@ -4,14 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
 public class GameView extends View {
-	private Image image = new Image(-150, 100);
+	private Image image;
 	private Stroke stroke = new Stroke(Color.RED, 10);
 	private boolean killed = false;
 	private boolean newUnicorn = true;
@@ -19,17 +18,15 @@ public class GameView extends View {
 	private int yChange = 0;
 
 	public GameView(Context context) {
-		super(context);
-		setBackgroundResource(R.drawable.space);
-		image.setAndScaleImage(getResources(), R.drawable.unicorn, 150, 150,
-				false);
+		this(context, null);
 	}
 
 	public GameView(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
 		setBackgroundResource(R.drawable.space);
-		image.setAndScaleImage(getResources(), R.drawable.unicorn, 150, 150,
-				false);
+		image = new Image(this);
+		image.insertImage("unicorn", R.drawable.unicorn, 150, 150);
+		image.insertImage("explosion", R.drawable.explosion, 150, 150);
 	}
 
 	/*
@@ -49,13 +46,8 @@ public class GameView extends View {
 
 		// show the exploding image when the unicorn is killed
 		if (killed) {
-			image.setAndScaleImage(getResources(), R.drawable.explosion, 150,
-					150, false);
-			canvas.drawBitmap(image.getImage(), image.getImagePoint().x,
-					image.getImagePoint().y, null);
+			image.drawBitmap(canvas, "explosion");
 			newUnicorn = true;
-			image.setAndScaleImage(getResources(), R.drawable.unicorn, 150,
-					150, false);
 			try {
 				Thread.sleep(10);
 			} catch (Exception e) {
@@ -65,22 +57,10 @@ public class GameView extends View {
 		}
 
 		// draws the unicorn at the specified point
-		canvas.drawBitmap(image.getImage(), image.getImagePoint().x,
-				image.getImagePoint().y, null);
+		image.drawBitmap(canvas, "unicorn");
 
 		// draws the stroke
-		if (stroke.getPoints().size() > 1) {
-			for (int i = 0; i < stroke.getPoints().size() - 1; i++) {
-				int startX = stroke.getPoints().get(i).x;
-				int stopX = stroke.getPoints().get(i + 1).x;
-				int startY = stroke.getPoints().get(i).y;
-				int stopY = stroke.getPoints().get(i + 1).y;
-				Paint paint = new Paint();
-				paint.setColor(stroke.getColor());
-				paint.setStrokeWidth(stroke.getWidth());
-				canvas.drawLine(startX, startY, stopX, stopY, paint);
-			}
-		}
+		stroke.drawStroke(canvas);
 
 	}
 
@@ -89,9 +69,8 @@ public class GameView extends View {
 	 */
 	public boolean onTouchEvent(MotionEvent event) {
 
-		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			stroke.addPoint((int) event.getX(), (int) event.getY());
-		} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+		if (event.getAction() == MotionEvent.ACTION_DOWN
+				|| event.getAction() == MotionEvent.ACTION_MOVE) {
 			stroke.addPoint((int) event.getX(), (int) event.getY());
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
 			stroke.clearPoints();
