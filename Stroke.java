@@ -1,6 +1,9 @@
 package edu.upenn.cis573.hwk2;
 
 import java.util.ArrayList;
+
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Point;
 
 /**
@@ -60,6 +63,27 @@ public class Stroke {
 	 */
 	protected void addPoint(int x, int y) {
 		points.add(new Point(x, y));
+	}
+
+	/**
+	 * Draw the stroke.
+	 * 
+	 * @param canvas
+	 *            The canvas to draw on.
+	 */
+	protected void drawStroke(Canvas canvas) {
+		if (getPoints().size() > 1) {
+			for (int i = 0; i < getPoints().size() - 1; i++) {
+				int startX = getPoints().get(i).x;
+				int stopX = getPoints().get(i + 1).x;
+				int startY = getPoints().get(i).y;
+				int stopY = getPoints().get(i + 1).y;
+				Paint paint = new Paint();
+				paint.setColor(getColor());
+				paint.setStrokeWidth(getWidth());
+				canvas.drawLine(startX, startY, stopX, stopY, paint);
+			}
+		}
 	}
 
 }
